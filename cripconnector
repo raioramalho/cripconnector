@@ -1,0 +1,65 @@
+#!/usr/bin/env python3
+# encoding: utf-8
+# Author: C0D3DG0D - Alan Ramalho [ramalho.sit@gmail.com]
+
+import os
+import click
+
+if (os.getuid() != 0):
+    print("Please run this tool at root!")
+    exit()
+else:
+    pass
+
+os.system("sleep 1")
+click.echo("""Cripconnector v1.0 - (https://gitlab.com/raioramalho/cripconnector)
+
+Set up your wireless connection without leaving your passwords visible.
+Created by C0D3DG0D - Alan Ramalho [ramalho.sit@gmail.com]
+""")
+
+@click.command()
+@click.option('-i', '--iface', 'iface', default=None, help='Set up wireless usb card.')
+@click.option('-e', '--essid', 'essid', default=None, help='Set the wireless ap essid.')
+@click.option('-p', '--password', 'password', default=None, help='Set the wireless ap password.')
+
+def main(iface, essid, password):
+
+    def help():
+        click.echo("Usage: cripconnector --help")
+        exit()
+    def conn():
+        os.system("""cat /tmp/CONF-"""+essid+""".conf | base64 --decode > /tmp/out.conf""")
+        os.system("""echo [+] $(wpa_supplicant -B -i """+iface+""" -c /tmp/out.conf)""")
+        os.system("rm -rf /tmp/*out.conf*")
+
+    if iface == None:
+        help()
+    else:
+        os.system("rfkill unblock all")
+        os.system("ifconfig "+iface+" up")
+        pass
+    if essid == None:
+        help()
+    elif essid != None:
+        click.echo("[+] Checking wireless network and connect to them.")
+        verify = os.path.exists("/tmp/CONF-"+essid+".conf")
+        if verify == True:
+            conn()
+            exit()
+        else:
+            if password != None:
+                os.system("""echo 'network={
+	ssid="""+"\""+essid+"\""+"""
+	psk="""+"\""+password+"\""+"""
+}' | base64 > /tmp/CONF-"""+essid+""".conf""")
+                conn()
+            else:
+                click.echo("[-] The ["+essid+"] is not configured, please insert the password!")
+                exit()
+    else:
+        main()
+
+
+
+main()
