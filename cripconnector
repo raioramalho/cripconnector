@@ -32,6 +32,7 @@ def main(iface, essid, password):
         os.system("""cat /tmp/CONF-"""+essid+""".conf | base64 --decode > /tmp/out.conf""")
         os.system("""echo [+] $(wpa_supplicant -B -i """+iface+""" -c /tmp/out.conf)""")
         os.system("rm -rf /tmp/*out.conf*")
+	os.system("dhclient"+iface+"")
 
     if iface == None:
         help()
